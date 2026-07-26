@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Website Uang Kas Kelas",
+  "description": "Aplikasi Manajemen Uang Kas Kelas modern dengan PHP Native, MySQL, Bootstrap 5, Dark Mode, Manajemen Bulan, Laporan PDF, dan Role Access.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
