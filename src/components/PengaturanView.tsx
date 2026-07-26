@@ -18,16 +18,16 @@ export const PengaturanView: React.FC<PengaturanViewProps> = ({
   setUsers,
   currentUser
 }) => {
-  const [namaKelas, setNamaKelas] = useState(pengaturan?.nama_kelas || 'XII RPL 1');
-  const [nominalFee, setNominalFee] = useState<number>(pengaturan?.nominal_kas_mingguan ?? 5000);
-  const [tahunAjaran, setTahunAjaran] = useState(pengaturan?.tahun_ajaran || '2026/2027');
-  const [namaWaliKelas, setNamaWaliKelas] = useState(pengaturan?.nama_wali_kelas || 'Dra. Endang Susilowati');
-  const [namaBendahara, setNamaBendahara] = useState(pengaturan?.nama_bendahara || 'Siti Rahma');
+  const [namaKelas, setNamaKelas] = useState(pengaturan?.nama_kelas || '');
+  const [nominalFee, setNominalFee] = useState<number>(pengaturan?.nominal_kas_mingguan ?? 0);
+  const [tahunAjaran, setTahunAjaran] = useState(pengaturan?.tahun_ajaran || '');
+  const [namaWaliKelas, setNamaWaliKelas] = useState(pengaturan?.nama_wali_kelas || '');
+  const [namaBendahara, setNamaBendahara] = useState(pengaturan?.nama_bendahara || '');
 
   // QRIS & E-Wallet States
-  const [qrisMerchantName, setQrisMerchantName] = useState(pengaturan?.qris_merchant_name || `KAS KELAS ${pengaturan?.nama_kelas || 'XII RPL 1'}`);
-  const [gopayNumber, setGopayNumber] = useState(pengaturan?.gopay_number || '081234567801 (a.n Siti Rahma)');
-  const [bankAccount, setBankAccount] = useState(pengaturan?.bank_account || 'BCA 8820123456 a.n Siti Rahma');
+  const [qrisMerchantName, setQrisMerchantName] = useState(pengaturan?.qris_merchant_name || '');
+  const [gopayNumber, setGopayNumber] = useState(pengaturan?.gopay_number || '');
+  const [bankAccount, setBankAccount] = useState(pengaturan?.bank_account || '');
 
   // New User Form States (Admin Only)
   const [newUsername, setNewUsername] = useState('');

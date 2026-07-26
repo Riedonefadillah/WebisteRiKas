@@ -23,7 +23,7 @@ export default function App() {
   // Auth state
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     try {
-      const saved = localStorage.getItem('kas_current_user');
+      const saved = localStorage.getItem('kaskelas_current_user');
       if (saved && saved !== 'null' && saved !== 'undefined') {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.username) return parsed;
@@ -37,7 +37,7 @@ export default function App() {
   // App Data States
   const [users, setUsers] = useState<User[]>(() => {
     try {
-      const saved = localStorage.getItem('kas_users');
+      const saved = localStorage.getItem('kaskelas_users');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -50,7 +50,7 @@ export default function App() {
 
   const [siswa, setSiswa] = useState<Siswa[]>(() => {
     try {
-      const saved = localStorage.getItem('kas_siswa');
+      const saved = localStorage.getItem('kaskelas_siswa');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) return parsed;
@@ -63,7 +63,7 @@ export default function App() {
 
   const [bulan, setBulan] = useState<BulanPembayaran[]>(() => {
     try {
-      const saved = localStorage.getItem('kas_bulan');
+      const saved = localStorage.getItem('kaskelas_bulan');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) return parsed;
@@ -76,7 +76,7 @@ export default function App() {
 
   const [pembayaran, setPembayaran] = useState<PembayaranKas[]>(() => {
     try {
-      const saved = localStorage.getItem('kas_pembayaran');
+      const saved = localStorage.getItem('kaskelas_pembayaran');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) return parsed;
@@ -89,7 +89,7 @@ export default function App() {
 
   const [pengeluaran, setPengeluaran] = useState<PengeluaranKas[]>(() => {
     try {
-      const saved = localStorage.getItem('kas_pengeluaran');
+      const saved = localStorage.getItem('kaskelas_pengeluaran');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) return parsed;
@@ -102,10 +102,10 @@ export default function App() {
 
   const [pengaturan, setPengaturan] = useState<PengaturanKelas>(() => {
     try {
-      const saved = localStorage.getItem('kas_pengaturan');
+      const saved = localStorage.getItem('kaskelas_pengaturan');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (parsed && typeof parsed === 'object' && parsed.nama_kelas) {
+        if (parsed && typeof parsed === 'object') {
           return { ...initialPengaturan, ...parsed };
         }
       }
@@ -126,31 +126,31 @@ export default function App() {
 
   // Sync to LocalStorage
   useEffect(() => {
-    localStorage.setItem('kas_current_user', JSON.stringify(currentUser));
+    localStorage.setItem('kaskelas_current_user', JSON.stringify(currentUser));
   }, [currentUser]);
 
   useEffect(() => {
-    localStorage.setItem('kas_users', JSON.stringify(users));
+    localStorage.setItem('kaskelas_users', JSON.stringify(users));
   }, [users]);
 
   useEffect(() => {
-    localStorage.setItem('kas_siswa', JSON.stringify(siswa));
+    localStorage.setItem('kaskelas_siswa', JSON.stringify(siswa));
   }, [siswa]);
 
   useEffect(() => {
-    localStorage.setItem('kas_bulan', JSON.stringify(bulan));
+    localStorage.setItem('kaskelas_bulan', JSON.stringify(bulan));
   }, [bulan]);
 
   useEffect(() => {
-    localStorage.setItem('kas_pembayaran', JSON.stringify(pembayaran));
+    localStorage.setItem('kaskelas_pembayaran', JSON.stringify(pembayaran));
   }, [pembayaran]);
 
   useEffect(() => {
-    localStorage.setItem('kas_pengeluaran', JSON.stringify(pengeluaran));
+    localStorage.setItem('kaskelas_pengeluaran', JSON.stringify(pengeluaran));
   }, [pengeluaran]);
 
   useEffect(() => {
-    localStorage.setItem('kas_pengaturan', JSON.stringify(pengaturan));
+    localStorage.setItem('kaskelas_pengaturan', JSON.stringify(pengaturan));
   }, [pengaturan]);
 
   // Handle Login success
@@ -165,7 +165,7 @@ export default function App() {
 
   // Handle Logout
   const handleLogout = () => {
-    localStorage.removeItem('kas_current_user');
+    localStorage.removeItem('kaskelas_current_user');
     setCurrentUser(null);
   };
 

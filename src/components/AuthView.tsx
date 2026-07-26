@@ -26,26 +26,6 @@ export const AuthView: React.FC<AuthViewProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Quick Demo Login Handler
-  const handleQuickLogin = (uname: string) => {
-    const found = users.find(u => u.username === uname);
-    if (found) {
-      onLoginSuccess(found);
-    } else if (uname === 'siswa_ahmad') {
-      // Fallback demo user for Ahmad Rizky
-      const demoSiswa: User = {
-        id: 3,
-        username: 'siswa_ahmad',
-        nama_lengkap: 'Ahmad Rizky Pratama',
-        role: 'Siswa',
-        siswa_id: 1,
-        nis: '1001',
-        created_at: new Date().toISOString()
-      };
-      onLoginSuccess(demoSiswa);
-    }
-  };
-
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
@@ -149,47 +129,6 @@ export const AuthView: React.FC<AuthViewProps> = ({
             <i className="bi bi-exclamation-triangle-fill me-2"></i>
             {errorMsg}
             <button type="button" className="btn-close" onClick={() => setErrorMsg('')}></button>
-          </div>
-        )}
-
-        {/* Quick Demo Login Presets */}
-        {!isRegister && (
-          <div className="bg-light p-2.5 rounded-3 border mb-4">
-            <div className="fw-bold text-secondary mb-1.5" style={{ fontSize: '11px', letterSpacing: '0.5px' }}>
-              ⚡ DEMO LOGIN CEPAT:
-            </div>
-            <div className="row g-1.5">
-              <div className="col-4">
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('admin')}
-                  className="btn btn-sm btn-primary-custom w-100 rounded-2 py-1.5"
-                  style={{ fontSize: '11px' }}
-                >
-                  <i className="bi bi-shield-fill me-1"></i>Admin
-                </button>
-              </div>
-              <div className="col-4">
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('bendahara')}
-                  className="btn btn-sm btn-success w-100 rounded-2 py-1.5"
-                  style={{ fontSize: '11px' }}
-                >
-                  <i className="bi bi-wallet-fill me-1"></i>Bendahara
-                </button>
-              </div>
-              <div className="col-4">
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('siswa_ahmad')}
-                  className="btn btn-sm btn-warning text-dark fw-bold w-100 rounded-2 py-1.5"
-                  style={{ fontSize: '11px' }}
-                >
-                  <i className="bi bi-person-fill me-1"></i>Siswa
-                </button>
-              </div>
-            </div>
           </div>
         )}
 
