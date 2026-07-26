@@ -1,10 +1,12 @@
-export type UserRole = 'Admin' | 'Bendahara';
+export type UserRole = 'Admin' | 'Bendahara' | 'Siswa';
 
 export interface User {
   id: number;
   username: string;
   nama_lengkap: string;
   role: UserRole;
+  siswa_id?: number; // Linked student profile ID if role is 'Siswa'
+  nis?: string;
   password_hash?: string;
   created_at: string;
 }
@@ -29,6 +31,9 @@ export interface BulanPembayaran {
   created_at: string;
 }
 
+export type MetodePembayaran = 'Tunai' | 'QRIS' | 'Transfer' | 'E-Wallet';
+export type StatusKonfirmasi = 'Disetujui' | 'Menunggu Konfirmasi' | 'Ditolak';
+
 export interface PembayaranKas {
   id: number;
   siswa_id: number;
@@ -36,6 +41,10 @@ export interface PembayaranKas {
   tanggal: string; // YYYY-MM-DD
   nominal: number;
   status: 'Lunas' | 'Belum Lunas';
+  metode_pembayaran?: MetodePembayaran;
+  status_konfirmasi?: StatusKonfirmasi;
+  bukti_pembayaran?: string; // Image base64 or URL
+  nomor_referensi?: string;
   catatan?: string;
   created_by?: string;
   created_at: string;
@@ -58,6 +67,12 @@ export interface PengaturanKelas {
   tahun_ajaran: string;
   nama_wali_kelas: string;
   nama_bendahara: string;
+  qris_merchant_name?: string;
+  gopay_number?: string;
+  dana_number?: string;
+  ovo_number?: string;
+  shopeepay_number?: string;
+  bank_account?: string;
 }
 
 export type ThemeColor = 'blue' | 'emerald' | 'purple' | 'sunset' | 'crimson';

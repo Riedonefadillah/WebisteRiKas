@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Siswa, BulanPembayaran, PembayaranKas, User } from '../types';
+import { Siswa, BulanPembayaran, PembayaranKas, User, MetodePembayaran } from '../types';
 import { ConfirmModal } from './ConfirmModal';
 
 interface PembayaranViewProps {
@@ -19,8 +19,10 @@ export const PembayaranView: React.FC<PembayaranViewProps> = ({
 }) => {
   const [search, setSearch] = useState('');
   const [filterBulanId, setFilterBulanId] = useState<number>(0);
+  const [filterStatusKonfirmasi, setFilterStatusKonfirmasi] = useState<string>('semua');
   const [editingPay, setEditingPay] = useState<PembayaranKas | null>(null);
   const [historySiswa, setHistorySiswa] = useState<Siswa | null>(null);
+  const [viewProofPay, setViewProofPay] = useState<PembayaranKas | null>(null);
 
   // Form states
   const [siswaId, setSiswaId] = useState<number>(0);
@@ -28,6 +30,8 @@ export const PembayaranView: React.FC<PembayaranViewProps> = ({
   const [tanggal, setTanggal] = useState<string>(new Date().toISOString().split('T')[0]);
   const [nominal, setNominal] = useState<number>(20000);
   const [status, setStatus] = useState<'Lunas' | 'Belum Lunas'>('Lunas');
+  const [metodePembayaran, setMetodePembayaran] = useState<MetodePembayaran>('Tunai');
+  const [nomorReferensi, setNomorReferensi] = useState('');
   const [catatan, setCatatan] = useState('');
 
   const [alertMsg, setAlertMsg] = useState<{ type: 'success' | 'danger'; text: string } | null>(null);
@@ -66,11 +70,19 @@ export const PembayaranView: React.FC<PembayaranViewProps> = ({
       !search ||
       s?.nama.toLowerCase().includes(search.toLowerCase()) ||
       s?.nis.toLowerCase().includes(search.toLowerCase()) ||
-      p.catatan?.toLowerCase().includes(search.toLowerCase());
+      p.catatan?.toLowerCase().includes(search.toLowerCase()) ||
+      p.nomor_referensi?.toLowerCase().includes(search.toLowerCase());
 
     const matchesBulan = filterBulanId === 0 || p.bulan_id === filterBulanId;
-    return matchesSearch && matchesBulan;
+    const matchesKonfirmasi =
+      filterStatusKonfirmasi === 'semua' ||
+      (filterStatusKonfirmasi === 'pending' && p.status_konfirmasi === 'Menunggu Konfirmasi') ||
+      (filterStatusKonfirmasi === 'disetujui' && p.status_konfirmasi === 'Disetujui');
+
+    return matchesSearch && matchesBulan && matchesKonfirmasi;
   });
+
+  const pendingCount = pembayaran.filter(p => p.status_konfirmasi === 'Menunggu Konfirmasi').length;
 
   // 1. TAMBAH PEMBAYARAN
   const handleAddPayment = (e: React.FormEvent) => {
@@ -80,7 +92,7 @@ export const PembayaranView: React.FC<PembayaranViewProps> = ({
       return;
     }
 
-    // Cek duplikasi
+    // Check duplicate
     const exists = pembayaran.some(p => p.siswa_id === siswaId && p.bulan_id === bulanId);
     if (exists) {
       showAlert('danger', 'Siswa ini sudah memiliki catatan pembayaran untuk bulan yang dipilih!');
@@ -94,6 +106,9 @@ export const PembayaranView: React.FC<PembayaranViewProps> = ({
       tanggal,
       nominal: Number(nominal),
       status,
+      metode_pembayaran: metodePembayaran,
+      status_konfirmasi: 'Disetujui',
+      nomor_referensi: nomorReferensi.trim() || undefined,
       catatan: catatan.trim(),
       created_by: currentUser?.username || 'Bendahara',
       created_at: new Date().toISOString().split('T')[0]
@@ -102,6 +117,7 @@ export const PembayaranView: React.FC<PembayaranViewProps> = ({
     setPembayaran([newPay, ...pembayaran]);
     setSiswaId(0);
     setBulanId(0);
+    setNomorReferensi('');
     setCatatan('');
     showAlert('success', 'Transaksi pembayaran berhasil dicatat!');
 
@@ -128,6 +144,24 @@ export const PembayaranView: React.FC<PembayaranViewProps> = ({
     }
   };
 
+  // Approve or Reject Student Payment
+  const handleApprovePayment = (id: number) => {
+    setPembayaran(pembayaran.map(p => p.id === id ? { ...p, status: 'Lunas', status_konfirmasi: 'Disetujui' } : p));
+    showAlert('success', 'Pembayaran kas berhasil disetujui (Lunas)!');
+  };
+
+  const handleRejectPayment = (id: number) => {
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Tolak Pembayaran',
+      message: 'Apakah Anda yakin ingin menolak transaksi pembayaran ini?',
+      onConfirm: () => {
+        setPembayaran(pembayaran.map(p => p.id === id ? { ...p, status: 'Belum Lunas', status_konfirmasi: 'Ditolak' } : p));
+        showAlert('danger', 'Transaksi pembayaran ditolak.');
+      }
+    });
+  };
+
   // 3. HAPUS PEMBAYARAN
   const handleDeletePayment = (id: number) => {
     setConfirmConfig({
@@ -149,9 +183,18 @@ export const PembayaranView: React.FC<PembayaranViewProps> = ({
           <h4 className="fw-bold mb-1 text-primary">
             <i className="bi bi-wallet-fill me-2"></i>Pembayaran Uang Kas
           </h4>
-          <p className="text-muted small mb-0">Kelola transaksi iuran kas siswa berdasarkan bulan yang terdaftar</p>
+          <p className="text-muted small mb-0">Kelola transaksi iuran kas siswa via Tunai, QRIS, &amp; E-Wallet</p>
         </div>
-        <div>
+        <div className="d-flex gap-2">
+          {pendingCount > 0 && (
+            <button
+              onClick={() => setFilterStatusKonfirmasi('pending')}
+              className="btn btn-warning btn-sm rounded-3 fw-bold shadow-sm px-3 py-2 animate-bounce"
+            >
+              <i className="bi bi-bell-fill me-1"></i>
+              Konfirmasi QRIS/Cash ({pendingCount})
+            </button>
+          )}
           <button
             className="btn btn-primary-custom btn-sm rounded-3 shadow-sm px-3 py-2 fw-semibold"
             data-bs-toggle="modal"
@@ -174,7 +217,7 @@ export const PembayaranView: React.FC<PembayaranViewProps> = ({
       {/* Main Table Card */}
       <div className="card border-0 shadow-sm rounded-4 p-3.5 bg-white">
         <div className="row g-2 mb-3 justify-content-between align-items-center">
-          <div className="col-12 col-sm-5 col-md-4">
+          <div className="col-12 col-sm-6 col-md-5 d-flex gap-2">
             <select
               className="form-select form-select-sm"
               value={filterBulanId}
@@ -187,14 +230,25 @@ export const PembayaranView: React.FC<PembayaranViewProps> = ({
                 </option>
               ))}
             </select>
+
+            <select
+              className="form-select form-select-sm"
+              value={filterStatusKonfirmasi}
+              onChange={(e) => setFilterStatusKonfirmasi(e.target.value)}
+            >
+              <option value="semua">Semua Status</option>
+              <option value="disetujui">Lunas / Disetujui</option>
+              <option value="pending">Menunggu Konfirmasi ({pendingCount})</option>
+            </select>
           </div>
+
           <div className="col-12 col-sm-6 col-md-4">
             <div className="input-group input-group-sm">
               <span className="input-group-text bg-light border-end-0"><i className="bi bi-search text-muted"></i></span>
               <input
                 type="text"
                 className="form-control bg-light border-start-0"
-                placeholder="Cari nama siswa / NIS..."
+                placeholder="Cari nama siswa / NIS / Ref..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -211,18 +265,20 @@ export const PembayaranView: React.FC<PembayaranViewProps> = ({
                 <th>Nama Siswa</th>
                 <th>Periode Bulan</th>
                 <th>Nominal</th>
-                <th>Tanggal Bayar</th>
+                <th>Metode</th>
+                <th>Tanggal</th>
                 <th>Status</th>
-                <th>Catatan</th>
-                <th width="120" className="text-center">Aksi</th>
+                <th width="140" className="text-center">Aksi</th>
               </tr>
             </thead>
             <tbody>
               {filteredPembayaran.map((p, index) => {
                 const s = siswa.find(x => x.id === p.siswa_id);
                 const b = bulan.find(x => x.id === p.bulan_id);
+                const isPending = p.status_konfirmasi === 'Menunggu Konfirmasi';
+
                 return (
-                  <tr key={p.id}>
+                  <tr key={p.id} className={isPending ? 'table-warning-subtle' : ''}>
                     <td>{index + 1}</td>
                     <td className="text-secondary fw-semibold">{s?.nis || '-'}</td>
                     <td className="fw-bold text-dark">
@@ -242,31 +298,87 @@ export const PembayaranView: React.FC<PembayaranViewProps> = ({
                       </span>
                     </td>
                     <td className="fw-bold text-success">Rp {p.nominal.toLocaleString('id-ID')}</td>
-                    <td className="text-muted">{p.tanggal}</td>
                     <td>
-                      <span className={`badge bg-${p.status === 'Lunas' ? 'success' : 'warning'}-subtle text-${p.status === 'Lunas' ? 'success' : 'warning'}`}>
-                        <i className={`bi bi-${p.status === 'Lunas' ? 'check-circle' : 'clock'} me-1`}></i>
-                        {p.status}
+                      <span className={`badge ${
+                        p.metode_pembayaran === 'QRIS' ? 'bg-danger text-white' :
+                        p.metode_pembayaran === 'E-Wallet' ? 'bg-info text-dark' :
+                        p.metode_pembayaran === 'Transfer' ? 'bg-primary text-white' :
+                        'bg-secondary text-white'
+                      }`}>
+                        {p.metode_pembayaran || 'Tunai'}
                       </span>
+                      {p.nomor_referensi && (
+                        <div className="text-muted font-monospace" style={{ fontSize: '10px' }}>
+                          {p.nomor_referensi}
+                        </div>
+                      )}
                     </td>
-                    <td className="text-muted small">{p.catatan || '-'}</td>
+                    <td className="text-muted small">{p.tanggal}</td>
+                    <td>
+                      {p.status_konfirmasi === 'Menunggu Konfirmasi' ? (
+                        <span className="badge bg-warning text-dark border">
+                          <i className="bi bi-clock-history me-1"></i>Pending
+                        </span>
+                      ) : p.status_konfirmasi === 'Ditolak' ? (
+                        <span className="badge bg-danger text-white">
+                          <i className="bi bi-x-circle me-1"></i>Ditolak
+                        </span>
+                      ) : (
+                        <span className={`badge bg-${p.status === 'Lunas' ? 'success' : 'warning'}-subtle text-${p.status === 'Lunas' ? 'success' : 'warning'}`}>
+                          <i className={`bi bi-${p.status === 'Lunas' ? 'check-circle' : 'clock'} me-1`}></i>
+                          {p.status}
+                        </span>
+                      )}
+                    </td>
                     <td className="text-center">
-                      <button
-                        onClick={() => setEditingPay(p)}
-                        className="btn btn-sm btn-light border text-primary me-1"
-                        data-bs-toggle="modal"
-                        data-bs-target="#modalEditBayar"
-                        title="Edit Pembayaran"
-                      >
-                        <i className="bi bi-pencil-fill"></i>
-                      </button>
-                      <button
-                        onClick={() => handleDeletePayment(p.id)}
-                        className="btn btn-sm btn-light border text-danger"
-                        title="Hapus Pembayaran"
-                      >
-                        <i className="bi bi-trash-fill"></i>
-                      </button>
+                      {isPending ? (
+                        <div className="btn-group btn-group-sm">
+                          <button
+                            onClick={() => handleApprovePayment(p.id)}
+                            className="btn btn-success fw-bold"
+                            title="Setujui Pembayaran"
+                          >
+                            <i className="bi bi-check-lg me-1"></i>Setujui
+                          </button>
+                          <button
+                            onClick={() => handleRejectPayment(p.id)}
+                            className="btn btn-outline-danger"
+                            title="Tolak Pembayaran"
+                          >
+                            <i className="bi bi-x-lg"></i>
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          {p.bukti_pembayaran && (
+                            <button
+                              onClick={() => setViewProofPay(p)}
+                              className="btn btn-sm btn-light border text-info me-1"
+                              data-bs-toggle="modal"
+                              data-bs-target="#modalViewProof"
+                              title="Lihat Bukti Foto"
+                            >
+                              <i className="bi bi-image"></i>
+                            </button>
+                          )}
+                          <button
+                            onClick={() => setEditingPay(p)}
+                            className="btn btn-sm btn-light border text-primary me-1"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalEditBayar"
+                            title="Edit Pembayaran"
+                          >
+                            <i className="bi bi-pencil-fill"></i>
+                          </button>
+                          <button
+                            onClick={() => handleDeletePayment(p.id)}
+                            className="btn btn-sm btn-light border text-danger"
+                            title="Hapus Pembayaran"
+                          >
+                            <i className="bi bi-trash-fill"></i>
+                          </button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 );
@@ -311,11 +423,8 @@ export const PembayaranView: React.FC<PembayaranViewProps> = ({
                   </select>
                 </div>
 
-                {/* Dynamic Month Selection from DB */}
                 <div className="mb-3">
-                  <label className="form-label small fw-semibold">
-                    Pilih Bulan Pembayaran <span className="badge bg-primary-subtle text-primary">Dinamis dari Database</span>
-                  </label>
+                  <label className="form-label small fw-semibold">Pilih Bulan Pembayaran</label>
                   <select
                     className="form-select"
                     value={bulanId}
@@ -330,6 +439,33 @@ export const PembayaranView: React.FC<PembayaranViewProps> = ({
                     ))}
                   </select>
                 </div>
+
+                <div className="mb-3">
+                  <label className="form-label small fw-semibold">Metode Pembayaran</label>
+                  <select
+                    className="form-select"
+                    value={metodePembayaran}
+                    onChange={(e) => setMetodePembayaran(e.target.value as MetodePembayaran)}
+                  >
+                    <option value="Tunai">Tunai (Cash)</option>
+                    <option value="QRIS">QRIS National Standard</option>
+                    <option value="E-Wallet">E-Wallet (GoPay, DANA, OVO, ShopeePay)</option>
+                    <option value="Transfer">Transfer Bank</option>
+                  </select>
+                </div>
+
+                {(metodePembayaran === 'QRIS' || metodePembayaran === 'E-Wallet' || metodePembayaran === 'Transfer') && (
+                  <div className="mb-3">
+                    <label className="form-label small fw-semibold">Nomor Referensi Transaksi / Kode</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Contoh: QRIS-992019 / REF-102"
+                      value={nomorReferensi}
+                      onChange={(e) => setNomorReferensi(e.target.value)}
+                    />
+                  </div>
+                )}
 
                 <div className="mb-3">
                   <label className="form-label small fw-semibold">Tanggal Pembayaran</label>
@@ -423,6 +559,19 @@ export const PembayaranView: React.FC<PembayaranViewProps> = ({
                     </select>
                   </div>
                   <div className="mb-3">
+                    <label className="form-label small fw-semibold">Metode Pembayaran</label>
+                    <select
+                      className="form-select"
+                      value={editingPay.metode_pembayaran || 'Tunai'}
+                      onChange={(e) => setEditingPay({ ...editingPay, metode_pembayaran: e.target.value as MetodePembayaran })}
+                    >
+                      <option value="Tunai">Tunai</option>
+                      <option value="QRIS">QRIS</option>
+                      <option value="E-Wallet">E-Wallet</option>
+                      <option value="Transfer">Transfer</option>
+                    </select>
+                  </div>
+                  <div className="mb-3">
                     <label className="form-label small fw-semibold">Tanggal</label>
                     <input
                       type="date"
@@ -473,6 +622,25 @@ export const PembayaranView: React.FC<PembayaranViewProps> = ({
         </div>
       </div>
 
+      {/* Modal View Proof Image */}
+      <div className="modal fade" id="modalViewProof" tabIndex={-1} aria-hidden="true">
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content border-0 shadow-lg rounded-4 text-center">
+            <div className="modal-header border-bottom-0">
+              <h5 className="modal-title fw-bold text-primary"><i className="bi bi-image me-2"></i>Bukti Pembayaran</h5>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div className="modal-body p-4">
+              {viewProofPay?.bukti_pembayaran ? (
+                <img src={viewProofPay.bukti_pembayaran} alt="Bukti" className="img-fluid rounded-3 border shadow-sm" />
+              ) : (
+                <p className="text-muted">Tidak ada gambar bukti yang diunggah.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Modal History Pembayaran Siswa */}
       <div className="modal fade" id="modalHistorySiswa" tabIndex={-1} aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered modal-lg">
@@ -492,6 +660,7 @@ export const PembayaranView: React.FC<PembayaranViewProps> = ({
                       <tr>
                         <th>Bulan Periode</th>
                         <th>Target Nominal</th>
+                        <th>Metode</th>
                         <th>Tanggal Bayar</th>
                         <th>Nominal Dibayar</th>
                         <th>Status</th>
@@ -504,6 +673,11 @@ export const PembayaranView: React.FC<PembayaranViewProps> = ({
                           <tr key={b.id}>
                             <td className="fw-bold text-dark">{b.nama_bulan}</td>
                             <td>Rp {b.nominal_target.toLocaleString('id-ID')}</td>
+                            <td>
+                              <span className="badge bg-light text-dark border">
+                                {payRecord?.metode_pembayaran || 'Tunai'}
+                              </span>
+                            </td>
                             <td>{payRecord ? payRecord.tanggal : '-'}</td>
                             <td className={`fw-bold ${payRecord ? 'text-success' : 'text-muted'}`}>
                               {payRecord ? `Rp ${payRecord.nominal.toLocaleString('id-ID')}` : 'Rp 0'}

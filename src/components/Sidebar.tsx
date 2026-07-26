@@ -16,7 +16,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   pengaturan,
   onLogout
 }) => {
-  const menuItems = [
+  const menuItems = currentUser?.role === 'Siswa' ? [
+    { id: 'portal_siswa', label: 'Portal Saya & QRIS', icon: 'bi-person-badge-fill' },
+    { id: 'pembayaran', label: 'Riwayat Pembayaran', icon: 'bi-wallet-fill' },
+    { id: 'laporan', label: 'Transparansi Kas', icon: 'bi-file-earmark-bar-graph-fill' },
+  ] : [
     { id: 'dashboard', label: 'Dashboard', icon: 'bi-grid-1x2-fill' },
     { id: 'siswa', label: 'Data Siswa', icon: 'bi-people-fill' },
     { id: 'bulan', label: 'Manajemen Bulan', icon: 'bi-calendar-check-fill' },
@@ -79,7 +83,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="fw-bold text-truncate text-dark" style={{ fontSize: '13px' }}>
               {currentUser?.nama_lengkap || 'User'}
             </div>
-            <span className={`badge ${currentUser?.role === 'Admin' ? 'bg-primary' : 'bg-success'} style-badge`} style={{ fontSize: '10px' }}>
+            <span className={`badge ${currentUser?.role === 'Admin' ? 'bg-primary' : currentUser?.role === 'Bendahara' ? 'bg-success' : 'bg-warning text-dark'} style-badge`} style={{ fontSize: '10px' }}>
               {currentUser?.role || 'Bendahara'}
             </span>
           </div>

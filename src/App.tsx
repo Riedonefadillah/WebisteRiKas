@@ -11,6 +11,7 @@ import { PembayaranView } from './components/PembayaranView';
 import { PengeluaranView } from './components/PengeluaranView';
 import { LaporanView } from './components/LaporanView';
 import { PengaturanView } from './components/PengaturanView';
+import { SiswaPortalView } from './components/SiswaPortalView';
 import { AuthView } from './components/AuthView';
 import { PhpExporterModal } from './components/PhpExporterModal';
 
@@ -114,8 +115,11 @@ export default function App() {
     return initialPengaturan;
   });
 
-  // Navigation
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  // Navigation tab
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    if (currentUser?.role === 'Siswa') return 'portal_siswa';
+    return 'dashboard';
+  });
 
   // Modal PHP Source Exporter
   const [isPhpModalOpen, setIsPhpModalOpen] = useState(false);
@@ -149,6 +153,16 @@ export default function App() {
     localStorage.setItem('kas_pengaturan', JSON.stringify(pengaturan));
   }, [pengaturan]);
 
+  // Handle Login success
+  const handleLoginSuccess = (u: User) => {
+    setCurrentUser(u);
+    if (u.role === 'Siswa') {
+      setActiveTab('portal_siswa');
+    } else {
+      setActiveTab('dashboard');
+    }
+  };
+
   // Handle Logout
   const handleLogout = () => {
     localStorage.removeItem('kas_current_user');
@@ -165,7 +179,15 @@ export default function App() {
   };
 
   if (!currentUser) {
-    return <AuthView users={users} setUsers={setUsers} onLoginSuccess={setCurrentUser} />;
+    return (
+      <AuthView
+        users={users}
+        setUsers={setUsers}
+        siswaList={siswa}
+        setSiswaList={setSiswa}
+        onLoginSuccess={handleLoginSuccess}
+      />
+    );
   }
 
   return (
@@ -220,6 +242,17 @@ export default function App() {
 
           {/* Body Content */}
           <main className="container-fluid px-3 px-md-4 pb-5 flex-grow-1">
+            {activeTab === 'portal_siswa' && (
+              <SiswaPortalView
+                currentUser={currentUser}
+                siswa={siswa}
+                bulan={bulan}
+                pembayaran={pembayaran}
+                setPembayaran={setPembayaran}
+                pengaturan={pengaturan}
+              />
+            )}
+
             {activeTab === 'dashboard' && (
               <DashboardView
                 siswa={siswa}

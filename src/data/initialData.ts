@@ -14,6 +14,15 @@ export const initialUsers: User[] = [
     nama_lengkap: 'Siti Rahma (Bendahara)',
     role: 'Bendahara',
     created_at: '2026-07-01 08:30:00'
+  },
+  {
+    id: 3,
+    username: 'siswa_ahmad',
+    nama_lengkap: 'Ahmad Rizky Pratama',
+    role: 'Siswa',
+    siswa_id: 1,
+    nis: '1001',
+    created_at: '2026-07-01 09:00:00'
   }
 ];
 
@@ -36,11 +45,11 @@ export const initialBulan: BulanPembayaran[] = [
 ];
 
 export const initialPembayaran: PembayaranKas[] = [
-  { id: 1, siswa_id: 1, bulan_id: 1, tanggal: '2026-07-05', nominal: 20000, status: 'Lunas', catatan: 'Pembayaran Tunai', created_by: 'bendahara', created_at: '2026-07-05' },
-  { id: 2, siswa_id: 2, bulan_id: 1, tanggal: '2026-07-06', nominal: 20000, status: 'Lunas', catatan: 'Pembayaran Transfer', created_by: 'bendahara', created_at: '2026-07-06' },
-  { id: 3, siswa_id: 3, bulan_id: 1, tanggal: '2026-07-07', nominal: 20000, status: 'Lunas', catatan: 'Pembayaran Tunai', created_by: 'bendahara', created_at: '2026-07-07' },
-  { id: 4, siswa_id: 4, bulan_id: 1, tanggal: '2026-07-10', nominal: 20000, status: 'Lunas', catatan: 'Pembayaran Tunai', created_by: 'bendahara', created_at: '2026-07-10' },
-  { id: 5, siswa_id: 1, bulan_id: 2, tanggal: '2026-07-20', nominal: 20000, status: 'Lunas', catatan: 'Pembayaran Lunas Bulan 2', created_by: 'bendahara', created_at: '2026-07-20' },
+  { id: 1, siswa_id: 1, bulan_id: 1, tanggal: '2026-07-05', nominal: 20000, status: 'Lunas', metode_pembayaran: 'Tunai', status_konfirmasi: 'Disetujui', catatan: 'Pembayaran Tunai', created_by: 'bendahara', created_at: '2026-07-05' },
+  { id: 2, siswa_id: 2, bulan_id: 1, tanggal: '2026-07-06', nominal: 20000, status: 'Lunas', metode_pembayaran: 'QRIS', status_konfirmasi: 'Disetujui', nomor_referensi: 'QRIS-8829102', catatan: 'Scan QRIS DANA', created_by: 'bendahara', created_at: '2026-07-06' },
+  { id: 3, siswa_id: 3, bulan_id: 1, tanggal: '2026-07-07', nominal: 20000, status: 'Lunas', metode_pembayaran: 'E-Wallet', status_konfirmasi: 'Disetujui', nomor_referensi: 'GOPAY-99382', catatan: 'Transfer GoPay', created_by: 'bendahara', created_at: '2026-07-07' },
+  { id: 4, siswa_id: 4, bulan_id: 1, tanggal: '2026-07-10', nominal: 20000, status: 'Lunas', metode_pembayaran: 'Tunai', status_konfirmasi: 'Disetujui', catatan: 'Pembayaran Tunai', created_by: 'bendahara', created_at: '2026-07-10' },
+  { id: 5, siswa_id: 1, bulan_id: 2, tanggal: '2026-07-20', nominal: 20000, status: 'Lunas', metode_pembayaran: 'QRIS', status_konfirmasi: 'Disetujui', nomor_referensi: 'QRIS-991203', catatan: 'Pembayaran QRIS Lunas', created_by: 'bendahara', created_at: '2026-07-20' },
 ];
 
 export const initialPengeluaran: PengeluaranKas[] = [
@@ -53,5 +62,11 @@ export const initialPengaturan: PengaturanKelas = {
   nominal_kas_mingguan: 5000,
   tahun_ajaran: '2026/2027',
   nama_wali_kelas: 'Dra. Endang Susilowati',
-  nama_bendahara: 'Siti Rahma'
+  nama_bendahara: 'Siti Rahma',
+  qris_merchant_name: 'KAS KELAS XII RPL 1',
+  gopay_number: '081234567801 (a.n Siti Rahma)',
+  dana_number: '081234567801 (a.n Siti Rahma)',
+  ovo_number: '081234567801 (a.n Siti Rahma)',
+  shopeepay_number: '081234567801 (a.n Siti Rahma)',
+  bank_account: 'BCA 8820123456 a.n Siti Rahma (Bendahara)'
 };

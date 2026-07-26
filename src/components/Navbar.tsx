@@ -116,7 +116,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
 
           {/* User Role Badge & Logout */}
-          <span className={`badge ${currentUser?.role === 'Admin' ? 'bg-primary' : 'bg-success'} px-2.5 py-1.5 rounded-pill small d-none d-sm-inline`}>
+          <span className={`badge ${currentUser?.role === 'Admin' ? 'bg-primary' : currentUser?.role === 'Bendahara' ? 'bg-success' : 'bg-warning text-dark'} px-2.5 py-1.5 rounded-pill small d-none d-sm-inline`}>
             <i className="bi bi-person-badge me-1"></i>
             {currentUser?.role || 'Bendahara'}
           </span>
@@ -136,7 +136,11 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Mobile Nav Tabs */}
       <div className="d-md-none d-flex overflow-x-auto gap-1 pt-2 mt-2 border-top">
-        {[
+        {(currentUser?.role === 'Siswa' ? [
+          { id: 'portal_siswa', label: 'Portal Siswa', icon: 'bi-person-badge-fill' },
+          { id: 'pembayaran', label: 'Riwayat Saya', icon: 'bi-wallet-fill' },
+          { id: 'laporan', label: 'Transparansi Kas', icon: 'bi-file-earmark-bar-graph-fill' },
+        ] : [
           { id: 'dashboard', label: 'Dashboard', icon: 'bi-grid-1x2-fill' },
           { id: 'siswa', label: 'Siswa', icon: 'bi-people-fill' },
           { id: 'bulan', label: 'Bulan', icon: 'bi-calendar-check-fill' },
@@ -144,7 +148,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           { id: 'pengeluaran', label: 'Pengeluaran', icon: 'bi-receipt-cutoff' },
           { id: 'laporan', label: 'Laporan', icon: 'bi-file-earmark-bar-graph-fill' },
           { id: 'pengaturan', label: 'Pengaturan', icon: 'bi-gear-fill' },
-        ].map((m) => (
+        ]).map((m) => (
           <button
             key={m.id}
             onClick={() => setActiveTab(m.id)}
