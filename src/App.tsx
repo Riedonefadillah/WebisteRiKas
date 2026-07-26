@@ -245,10 +245,11 @@ export default function App() {
             {activeTab === 'portal_siswa' && (
               <SiswaPortalView
                 currentUser={currentUser}
-                siswa={siswa}
-                bulan={bulan}
-                pembayaran={pembayaran}
-                setPembayaran={setPembayaran}
+                siswaList={siswa}
+                bulanList={bulan}
+                pembayaranList={pembayaran}
+                setPembayaranList={setPembayaran}
+                pengeluaranList={pengeluaran}
                 pengaturan={pengaturan}
               />
             )}
